@@ -1,8 +1,6 @@
 package com.arthur.rukiasvet.core.network
 
-
-import com.arthur.rukiasvet.features.patient.data.model.PatientRequest
-import com.arthur.rukiasvet.features.patient.data.model.PatientResponse
+import com.arthur.rukiasvet.features.patient.data.model.PatientRequest // Importante
 import com.arthur.rukiasvet.login.rukiasvet.data.model.LoginRequest
 import com.arthur.rukiasvet.login.rukiasvet.data.model.LoginResponse
 import com.arthur.rukiasvet.login.rukiasvet.data.model.RegisterRequest
@@ -29,5 +27,5 @@ interface Api_Veterinaria {
     @GET("patients")
     suspend fun obtenerPacientes(
         @Header("Authorization") token: String
-    ): Response<List<PatientResponse>>
+    ): Response<List<PatientRequest>>
 }

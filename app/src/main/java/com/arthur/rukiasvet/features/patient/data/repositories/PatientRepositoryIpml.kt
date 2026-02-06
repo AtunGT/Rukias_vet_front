@@ -1,8 +1,9 @@
 package com.arthur.rukiasvet.features.patient.data.repositories
 
 import com.arthur.rukiasvet.core.network.Api_Veterinaria
+import com.arthur.rukiasvet.features.patient.data.datasources.remote.mapper.toDomain
 import com.arthur.rukiasvet.features.patient.data.model.PatientRequest
-import com.arthur.rukiasvet.features.patient.data.model.PatientResponse
+import com.arthur.rukiasvet.features.patient.domain.model.Patient
 import com.arthur.rukiasvet.features.patient.domain.repositories.PatientRepository
 
 class PatientRepositoryImpl(
@@ -15,20 +16,25 @@ class PatientRepositoryImpl(
             val response = api.agregarPaciente(header, paciente)
             response.isSuccessful
         } catch (e: Exception) {
+            e.printStackTrace()
             false
         }
     }
 
-    override suspend fun getPatients(token: String): List<PatientResponse> {
+    override suspend fun getPatients(token: String): List<Patient> {
         return try {
             val header = if (token.startsWith("Bearer ")) token else "Bearer $token"
+
             val response = api.obtenerPacientes(header)
+
             if (response.isSuccessful) {
-                response.body() ?: emptyList()
+                val requests = response.body() ?: emptyList()
+                requests.toDomain()
             } else {
                 emptyList()
             }
         } catch (e: Exception) {
+            e.printStackTrace()
             emptyList()
         }
     }

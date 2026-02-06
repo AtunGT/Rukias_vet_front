@@ -1,6 +1,6 @@
 package com.arthur.rukiasvet.features.patient.presentation.viewmodels
 
-import com.arthur.rukiasvet.features.patient.data.model.PatientResponse
+import com.arthur.rukiasvet.features.patient.domain.model.Patient
 
 data class PatientUIState(
     val nombre: String = "",
@@ -10,7 +10,7 @@ data class PatientUIState(
     val telefono: String = "",
     val descripcion: String = "",
 
-    val listaPacientes: List<PatientResponse> = emptyList(),
+    val listaPacientes: List<Patient> = emptyList(),
 
     val isLoading: Boolean = false,
     val mensajeExito: Boolean = false,

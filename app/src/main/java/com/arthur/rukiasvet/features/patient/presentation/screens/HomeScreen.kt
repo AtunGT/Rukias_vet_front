@@ -22,7 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.arthur.rukiasvet.features.patient.data.model.PatientResponse
+import com.arthur.rukiasvet.features.patient.domain.model.Patient
 import com.arthur.rukiasvet.features.patient.presentation.viewmodels.PatientViewModel
 
 @Composable
@@ -145,15 +145,18 @@ fun HomeScreen(
 }
 
 @Composable
-fun PatientItem(paciente: PatientResponse) {
-    val nombreSeguro = paciente.name ?: "Sin Nombre"
-    val duenoSeguro = paciente.owner ?: "Sin Dueño"
-    val descSegura = paciente.description ?: "Sin descripción"
-    val telefono = paciente.telephone ?: ""
-    val edad = paciente.age ?: ""
+fun PatientItem(paciente: Patient) { // <--- RECIBE PATIENT (Dominio)
+    // Ya no necesitamos los "?:" porque el Mapper en la capa de datos ya limpió los nulos.
+    // Simplemente accedemos a las propiedades.
+
+    val nombre = paciente.name
+    val dueno = paciente.owner
+    val descripcion = paciente.description
+    val telefono = paciente.telephone
+    val edad = paciente.age
 
     // Tomamos la inicial
-    val letraInicial = if (nombreSeguro.isNotEmpty()) nombreSeguro.take(1).uppercase() else "?"
+    val letraInicial = if (nombre.isNotEmpty()) nombre.take(1).uppercase() else "?"
 
     Card(
         colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -186,7 +189,7 @@ fun PatientItem(paciente: PatientResponse) {
             // Datos del Paciente
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = nombreSeguro,
+                    text = nombre,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
                     color = Color.Black
@@ -194,7 +197,7 @@ fun PatientItem(paciente: PatientResponse) {
 
                 // Dueño y Teléfono
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = "Dueño: $duenoSeguro", color = Color.Gray, fontSize = 13.sp)
+                    Text(text = "Dueño: $dueno", color = Color.Gray, fontSize = 13.sp)
                     if (telefono.isNotEmpty()) {
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(text = " $telefono", color = Color.Gray, fontSize = 13.sp)
@@ -202,16 +205,16 @@ fun PatientItem(paciente: PatientResponse) {
                 }
 
                 // Edad (si existe)
-                if (edad.isNotEmpty()) {
+                if (edad.isNotEmpty() && edad != "0") {
                     Text(text = "Edad: $edad", color = Color.Gray, fontSize = 13.sp)
                 }
 
                 Spacer(modifier = Modifier.height(4.dp))
 
                 // Descripción
-                if (descSegura.isNotEmpty()) {
+                if (descripcion.isNotEmpty()) {
                     Text(
-                        text = descSegura,
+                        text = descripcion,
                         color = Color(0xFF6B7280),
                         fontSize = 12.sp,
                         maxLines = 2,

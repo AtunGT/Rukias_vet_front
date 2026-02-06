@@ -3,9 +3,8 @@ package com.arthur.rukiasvet.features.patient.presentation.viewmodels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arthur.rukiasvet.features.patient.data.model.PatientRequest
-import com.arthur.rukiasvet.features.patient.data.model.PatientResponse
-import com.arthur.rukiasvet.features.patient.domain.repositories.PatientRepository
 import com.arthur.rukiasvet.features.patient.domain.usecases.AddPatientUseCase
+import com.arthur.rukiasvet.features.patient.domain.usecases.GetAllPatientsUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,14 +12,13 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class PatientViewModel(
-    private val addPatientUseCase: AddPatientUseCase, // <--- AQUI USAMOS EL USE CASE
-    private val repository: PatientRepository // Mantenemos el repo solo para LEER lista
+    private val addPatientUseCase: AddPatientUseCase,
+    private val getAllPatientsUseCase: GetAllPatientsUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(PatientUIState())
     val uiState: StateFlow<PatientUIState> = _uiState.asStateFlow()
 
-    // --- Inputs del formulario ---
     fun onNombreChange(v: String) { _uiState.update { it.copy(nombre = v) } }
     fun onPesoChange(v: String) { _uiState.update { it.copy(peso = v) } }
     fun onEdadChange(v: String) { _uiState.update { it.copy(edad = v) } }
@@ -34,16 +32,17 @@ class PatientViewModel(
         }
     }
 
-    // Cargar pacientes (Usamos repo directo para no crear otro UseCase ahorita)
     fun cargarPacientes(token: String) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            val lista = repository.getPatients(token)
+
+            val lista = getAllPatientsUseCase(token)
+
             _uiState.update { it.copy(isLoading = false, listaPacientes = lista) }
         }
     }
 
-    // GUARDAR: AQUI USAMOS TU USE CASE
+
     fun guardarPaciente(token: String, onSuccess: () -> Unit) {
         val currentState = _uiState.value
         if (currentState.nombre.isEmpty() || currentState.peso.isEmpty() ||
