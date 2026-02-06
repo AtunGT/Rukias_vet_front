@@ -148,7 +148,11 @@ fun HomeScreen(
 fun PatientItem(paciente: PatientResponse) {
     val nombreSeguro = paciente.name ?: "Sin Nombre"
     val duenoSeguro = paciente.owner ?: "Sin Dueño"
-    val descSegura = paciente.description ?: ""
+    val descSegura = paciente.description ?: "Sin descripción"
+    val telefono = paciente.telephone ?: ""
+    val edad = paciente.age ?: ""
+
+    // Tomamos la inicial
     val letraInicial = if (nombreSeguro.isNotEmpty()) nombreSeguro.take(1).uppercase() else "?"
 
     Card(
@@ -161,6 +165,7 @@ fun PatientItem(paciente: PatientResponse) {
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // Círculo con inicial
             Surface(
                 modifier = Modifier.size(50.dp),
                 shape = CircleShape,
@@ -175,17 +180,42 @@ fun PatientItem(paciente: PatientResponse) {
                     )
                 }
             }
-            Spacer(modifier = Modifier.width(16.dp))
-            Column {
-                Text(text = nombreSeguro, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                Text(text = "Dueño: $duenoSeguro", color = Color.Gray, fontSize = 14.sp)
 
+            Spacer(modifier = Modifier.width(16.dp))
+
+            // Datos del Paciente
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = nombreSeguro,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    color = Color.Black
+                )
+
+                // Dueño y Teléfono
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(text = "Dueño: $duenoSeguro", color = Color.Gray, fontSize = 13.sp)
+                    if (telefono.isNotEmpty()) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(text = " $telefono", color = Color.Gray, fontSize = 13.sp)
+                    }
+                }
+
+                // Edad (si existe)
+                if (edad.isNotEmpty()) {
+                    Text(text = "Edad: $edad", color = Color.Gray, fontSize = 13.sp)
+                }
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                // Descripción
                 if (descSegura.isNotEmpty()) {
                     Text(
                         text = descSegura,
-                        color = Color.Gray,
+                        color = Color(0xFF6B7280),
                         fontSize = 12.sp,
-                        maxLines = 1,
+                        maxLines = 2,
+                        lineHeight = 14.sp,
                         overflow = TextOverflow.Ellipsis
                     )
                 }
