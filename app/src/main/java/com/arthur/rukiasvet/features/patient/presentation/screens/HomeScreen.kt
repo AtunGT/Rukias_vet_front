@@ -19,10 +19,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.arthur.rukiasvet.features.patient.domain.model.Patient
+import com.arthur.rukiasvet.features.patient.presentation.components.PatientItem
 import com.arthur.rukiasvet.features.patient.presentation.viewmodels.PatientViewModel
 
 @Composable
@@ -34,7 +33,7 @@ fun HomeScreen(
     onAddPatientClick: () -> Unit
 ) {
     val BluePrimary = Color(0xFF1E60F6)
-    val BackgroundColor = Color(0xFFEFF6FF)
+    val BackgroundColor = Color(0xFFEEF2FA)
     val TextDark = Color(0xFF1F2937)
     val TextGray = Color(0xFF6B7280)
 
@@ -48,20 +47,24 @@ fun HomeScreen(
         containerColor = BackgroundColor,
         floatingActionButton = {
             FloatingActionButton(
-                onClick = onAddPatientClick,
+                onClick = {
+                    patientVm.limpiarFormulario()
+                    onAddPatientClick()
+                },
                 containerColor = BluePrimary,
-                shape = CircleShape,
-                modifier = Modifier.size(60.dp)
+                shape = CircleShape
             ) {
-                Icon(Icons.Default.Add, contentDescription = null, tint = Color.White)
+                Icon(Icons.Default.Add, null, tint = Color.White)
             }
         }
-    ) { paddingValues ->
+    ) { padding ->
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(padding)
         ) {
+
             Card(
                 colors = CardDefaults.cardColors(containerColor = Color.White),
                 shape = RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp),
@@ -77,33 +80,58 @@ fun HomeScreen(
                         shape = RoundedCornerShape(12.dp),
                         color = BluePrimary
                     ) {
-                        Box(contentAlignment = Alignment.Center) { Text("🐾", fontSize = 24.sp) }
+                        Box(contentAlignment = Alignment.Center) {
+                            Text("🐾", fontSize = 22.sp)
+                        }
                     }
+
                     Spacer(modifier = Modifier.width(12.dp))
+
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("Clínica Veterinaria", color = TextDark, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                        Text("Hola, $nombreUsuario", color = TextGray, fontSize = 14.sp)
+                        Text(
+                            text = "Clínica Veterinaria",
+                            fontWeight = FontWeight.Bold,
+                            color = TextDark,
+                            fontSize = 16.sp
+                        )
+                        Text(
+                            text = "Hola, $nombreUsuario",
+                            color = TextGray,
+                            fontSize = 14.sp
+                        )
                     }
+
                     IconButton(onClick = onCerrarSesion) {
-                        Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = null, tint = TextGray)
+                        Icon(
+                            Icons.AutoMirrored.Filled.ExitToApp,
+                            null,
+                            tint = TextGray
+                        )
                     }
                 }
             }
 
-            Column(modifier = Modifier.padding(20.dp)) {
-                TextField(
+            Column(
+                modifier = Modifier.padding(20.dp)
+            ) {
+
+                OutlinedTextField(
                     value = "",
                     onValueChange = {},
-                    placeholder = { Text("Buscar paciente...", color = TextGray) },
-                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = TextGray) },
-                    modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)),
-                    colors = TextFieldDefaults.colors(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp)),
+                    placeholder = { Text("Buscar paciente...") },
+                    leadingIcon = {
+                        Icon(Icons.Default.Search, null, tint = TextGray)
+                    },
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Color.Transparent,
+                        unfocusedBorderColor = Color.Transparent,
                         focusedContainerColor = Color.White,
-                        unfocusedContainerColor = Color.White,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent
-                    ),
-                    singleLine = true
+                        unfocusedContainerColor = Color.White
+                    )
                 )
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -115,27 +143,39 @@ fun HomeScreen(
                 ) {
                     Text(
                         text = "${state.listaPacientes.size} pacientes registrados",
-                        color = BluePrimary,
+                        modifier = Modifier.padding(16.dp),
                         fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.padding(16.dp)
+                        color = BluePrimary
                     )
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
 
                 if (state.isLoading) {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
                         CircularProgressIndicator(color = BluePrimary)
                     }
                 } else if (state.listaPacientes.isEmpty()) {
                     EmptyState()
                 } else {
                     LazyColumn(
-                        contentPadding = PaddingValues(bottom = 80.dp),
+                        contentPadding = PaddingValues(bottom = 100.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         items(state.listaPacientes) { paciente ->
-                            PatientItem(paciente)
+                            PatientItem(
+                                paciente = paciente,
+                                onEditClick = {
+                                    patientVm.startEdit(paciente)
+                                    onAddPatientClick()
+                                },
+                                onDeleteClick = {
+                                    patientVm.deletePatient(token, paciente)
+                                }
+                            )
                         }
                     }
                 }
@@ -145,106 +185,33 @@ fun HomeScreen(
 }
 
 @Composable
-fun PatientItem(paciente: Patient) { // <--- RECIBE PATIENT (Dominio)
-    // Ya no necesitamos los "?:" porque el Mapper en la capa de datos ya limpió los nulos.
-    // Simplemente accedemos a las propiedades.
-
-    val nombre = paciente.name
-    val dueno = paciente.owner
-    val descripcion = paciente.description
-    val telefono = paciente.telephone
-    val edad = paciente.age
-
-    // Tomamos la inicial
-    val letraInicial = if (nombre.isNotEmpty()) nombre.take(1).uppercase() else "?"
-
-    Card(
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Círculo con inicial
-            Surface(
-                modifier = Modifier.size(50.dp),
-                shape = CircleShape,
-                color = Color(0xFFE0E7FF)
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Text(
-                        text = letraInicial,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF1E60F6)
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            // Datos del Paciente
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = nombre,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp,
-                    color = Color.Black
-                )
-
-                // Dueño y Teléfono
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = "Dueño: $dueno", color = Color.Gray, fontSize = 13.sp)
-                    if (telefono.isNotEmpty()) {
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(text = " $telefono", color = Color.Gray, fontSize = 13.sp)
-                    }
-                }
-
-                // Edad (si existe)
-                if (edad.isNotEmpty() && edad != "0") {
-                    Text(text = "Edad: $edad", color = Color.Gray, fontSize = 13.sp)
-                }
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                // Descripción
-                if (descripcion.isNotEmpty()) {
-                    Text(
-                        text = descripcion,
-                        color = Color(0xFF6B7280),
-                        fontSize = 12.sp,
-                        maxLines = 2,
-                        lineHeight = 14.sp,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
 fun EmptyState() {
     Card(
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(240.dp),
         shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        modifier = Modifier.fillMaxWidth().height(250.dp)
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text("🐾", fontSize = 50.sp, color = Color(0xFFE0E0E0))
-            Spacer(modifier = Modifier.height(16.dp))
-            Text("No hay pacientes registrados", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-            Spacer(modifier = Modifier.height(8.dp))
-            Text("Comienza agregando tu primer paciente", color = Color.Gray, fontSize = 14.sp)
+            Text("🐾", fontSize = 48.sp)
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = "No hay pacientes registrados",
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp
+            )
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = "Agrega tu primer paciente",
+                color = Color.Gray,
+                fontSize = 14.sp
+            )
         }
     }
 }

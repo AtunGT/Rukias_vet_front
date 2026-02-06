@@ -9,9 +9,7 @@ data class PatientUIState(
     val dueno: String = "",
     val telefono: String = "",
     val descripcion: String = "",
-
     val listaPacientes: List<Patient> = emptyList(),
-
     val isLoading: Boolean = false,
     val mensajeExito: Boolean = false,
     val mensajeError: String = ""

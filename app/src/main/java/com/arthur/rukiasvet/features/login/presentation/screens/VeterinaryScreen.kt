@@ -62,18 +62,19 @@ fun VeterinaryScreen(
     }
 }
 
-
 @Composable
-fun LoginOrRegisterContent(vm: VeterinaryViewModel, state: VeterinaryUIState) {
-    val BluePrimary = Color(0xFF1E60F6)
-    val BackgroundColor = Color(0xFFEFF6FF)
+fun LoginOrRegisterContent(
+    vm: VeterinaryViewModel,
+    state: VeterinaryUIState
+) {
+    val BackgroundColor = Color(0xFFEEF2FA)
 
     Box(
-        modifier = Modifier.fillMaxSize().background(BackgroundColor),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(BackgroundColor),
         contentAlignment = Alignment.Center
     ) {
-        Box(modifier = Modifier.fillMaxSize().background(BluePrimary))
-
         if (state.esRegistro) {
             RegisterCard(
                 nombre = vm.regNombre,

@@ -9,6 +9,8 @@ import com.arthur.rukiasvet.features.login.domain.repositories.VeterinaryReposit
 import com.arthur.rukiasvet.login.rukiasvet.data.model.LoginRequest
 import com.arthur.rukiasvet.login.rukiasvet.data.model.RegisterRequest
 
+
+
 class VeterinaryRepositoryImpl(
     private val api: Api_Veterinaria,
     private val tokendeco: Tokendeco
