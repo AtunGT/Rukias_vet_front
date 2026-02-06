@@ -36,52 +36,13 @@ fun VeterinaryCard(
     var showPassword by remember { mutableStateOf(false) }
 
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
     ) {
         Column {
-
-
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(BluePrimary)
-                    .padding(vertical = 28.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Surface(
-                    shape = CircleShape,
-                    color = Color.White,
-                    modifier = Modifier.size(56.dp)
-                ) {
-                    Icon(
-                        Icons.Default.Pets,
-                        contentDescription = null,
-                        tint = BluePrimary,
-                        modifier = Modifier.padding(12.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Text(
-                    text = "Clínica Veterinaria",
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp
-                )
-
-                Text(
-                    text = "Sistema de Gestión de Pacientes",
-                    color = Color.White.copy(alpha = 0.9f),
-                    fontSize = 13.sp
-                )
-            }
-
+            RegisterHeader(BluePrimary)
 
             Column(
                 modifier = Modifier.padding(24.dp),
@@ -91,64 +52,46 @@ fun VeterinaryCard(
                     text = "Iniciar Sesión",
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp,
-                    color = Color.Black
+                    color = Color.Black // Negro
                 )
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-
+                // Email
                 Text(
-                    text = "Correo electronico",
+                    text = "Correo electrónico",
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Medium,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    color = Color.Black // Forzamos negro aquí también
                 )
-
                 Spacer(modifier = Modifier.height(6.dp))
 
-                OutlinedTextField(
+                CustomLoginField(
                     value = email,
                     onValueChange = onEmailChange,
-                    placeholder = { Text("Ingresa tu usuario") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
+                    placeholder = "Ingresa tu usuario"
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
-
 
                 Text(
                     text = "Contraseña",
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Medium,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    color = Color.Black
                 )
-
                 Spacer(modifier = Modifier.height(6.dp))
 
-                OutlinedTextField(
+                CustomLoginField(
                     value = password,
                     onValueChange = onPasswordChange,
-                    placeholder = { Text("Ingresa tu contraseña") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    visualTransformation = if (showPassword)
-                        VisualTransformation.None
-                    else
-                        PasswordVisualTransformation(),
-                    trailingIcon = {
-                        IconButton(onClick = { showPassword = !showPassword }) {
-                            Icon(
-                                imageVector = if (showPassword)
-                                    Icons.Default.VisibilityOff
-                                else
-                                    Icons.Default.Visibility,
-                                contentDescription = null
-                            )
-                        }
-                    },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+                    placeholder = "Ingresa tu contraseña",
+                    isPasswordField = true,
+                    showPassword = showPassword,
+                    onPasswordToggle = { showPassword = !showPassword },
+                    keyboardType = KeyboardType.Password
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -169,7 +112,7 @@ fun VeterinaryCard(
                             strokeWidth = 2.dp
                         )
                     } else {
-                        Text("Iniciar Sesión", fontSize = 16.sp)
+                        Text("Iniciar Sesión", fontSize = 16.sp, color = (Color.White))
                     }
                 }
 

@@ -10,7 +10,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import com.arthur.rukiasvet.features.patient.presentation.components.PatientCard
+import com.arthur.rukiasvet.features.patient.presentation.components.PatientForm
 import com.arthur.rukiasvet.features.patient.presentation.viewmodels.PatientViewModel
 
 @Composable
@@ -30,7 +30,7 @@ fun PatientScreen(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            PatientCard(
+            PatientForm(
                 nombre = state.nombre,
                 onNombreChange = vm::onNombreChange,
                 peso = state.peso,

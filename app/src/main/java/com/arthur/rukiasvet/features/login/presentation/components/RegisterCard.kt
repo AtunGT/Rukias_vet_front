@@ -45,50 +45,12 @@ fun RegisterCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
         Column {
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(
-                        color = BluePrimary,
-                        shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
-                    )
-                    .padding(vertical = 24.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-
-                    Box(
-                        modifier = Modifier
-                            .size(48.dp)
-                            .background(Color.White, CircleShape),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text("🐾", fontSize = 22.sp)
-                    }
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    Text(
-                        text = "Clínica Veterinaria",
-                        color = Color.White,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-
-                    Text(
-                        text = "Sistema de Gestión de Pacientes",
-                        color = Color.White.copy(alpha = 0.9f),
-                        fontSize = 13.sp
-                    )
-                }
-            }
+            RegisterHeader(BluePrimary)
 
             Column(
                 modifier = Modifier.padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-
                 Text(
                     text = "Crear Cuenta",
                     fontSize = 18.sp,
@@ -98,97 +60,64 @@ fun RegisterCard(
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                OutlinedTextField(
-                    value = nombre,
-                    onValueChange = onNombreChange,
-                    label = { Text("Nombre") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
-                )
-
+                AuthTextField(nombre, onNombreChange, "Nombre")
                 Spacer(modifier = Modifier.height(8.dp))
 
-                OutlinedTextField(
-                    value = apellidos,
-                    onValueChange = onApellidosChange,
-                    label = { Text("Apellidos") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
-                )
-
+                AuthTextField(apellidos, onApellidosChange, "Apellidos")
                 Spacer(modifier = Modifier.height(8.dp))
 
-                OutlinedTextField(
+                AuthTextField(
                     value = email,
                     onValueChange = onEmailChange,
-                    label = { Text("Correo Electrónico") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+                    label = "Correo Electrónico",
+                    keyboardType = KeyboardType.Email
                 )
-
                 Spacer(modifier = Modifier.height(8.dp))
 
-                OutlinedTextField(
+                AuthTextField(
                     value = password,
                     onValueChange = onPasswordChange,
-                    label = { Text("Contraseña") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    visualTransformation = PasswordVisualTransformation(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+                    label = "Contraseña",
+                    keyboardType = KeyboardType.Password,
+                    isPassword = true
                 )
-
                 Spacer(modifier = Modifier.height(8.dp))
 
-                OutlinedTextField(
+                AuthTextField(
                     value = confirmPassword,
                     onValueChange = onConfirmPasswordChange,
-                    label = { Text("Confirmar Contraseña") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    visualTransformation = PasswordVisualTransformation(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+                    label = "Confirmar Contraseña",
+                    keyboardType = KeyboardType.Password,
+                    isPassword = true
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Button(
                     onClick = onRegisterClick,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp),
+                    modifier = Modifier.fillMaxWidth().height(50.dp),
                     shape = RoundedCornerShape(10.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = BluePrimary),
                     enabled = !isLoading
                 ) {
                     if (isLoading) {
-                        CircularProgressIndicator(
-                            color = Color.White,
-                            modifier = Modifier.size(24.dp)
-                        )
+                        CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
                     } else {
-                        Text("Registrarse", fontSize = 16.sp)
+                        Text("Registrarse", fontSize = 16.sp, color = Color.White)
                     }
                 }
 
                 if (mensajeError.isNotEmpty()) {
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Text(mensajeError, color = Color.Red, fontWeight = FontWeight.Bold)
+                    Text(mensajeError, color = Color.Red, modifier = Modifier.padding(top = 12.dp))
                 }
-
                 if (mensajeExito.isNotEmpty()) {
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Text(mensajeExito, color = Color(0xFF4CAF50), fontWeight = FontWeight.Bold)
+                    Text(mensajeExito, color = Color(0xFF4CAF50), modifier = Modifier.padding(top = 12.dp))
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 TextButton(onClick = onLoginClick) {
-                    Text(
-                        text = "¿Ya tienes cuenta? Inicia sesión",
-                        color = BluePrimary
-                    )
+                    Text("¿Ya tienes cuenta? Inicia sesión", color = BluePrimary)
                 }
             }
         }

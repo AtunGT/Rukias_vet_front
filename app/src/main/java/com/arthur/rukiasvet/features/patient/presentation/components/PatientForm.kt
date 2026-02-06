@@ -3,7 +3,6 @@ package com.arthur.rukiasvet.features.patient.presentation.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -17,7 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun PatientCard(
+fun PatientForm(
     nombre: String,
     onNombreChange: (String) -> Unit,
     peso: String,
@@ -50,7 +49,6 @@ fun PatientCard(
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -59,47 +57,31 @@ fun PatientCard(
                 Text(
                     text = "Nuevo Paciente",
                     fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
                 )
                 IconButton(onClick = onCerrarClick) {
-                    Icon(Icons.Default.Close, contentDescription = null)
+                    Icon(Icons.Default.Close, contentDescription = null, tint = Color.Black)
                 }
             }
 
             Divider(modifier = Modifier.padding(vertical = 12.dp))
 
-            OutlinedTextField(
-                value = nombre,
-                onValueChange = onNombreChange,
-                label = { Text("Nombre de la Mascota *") },
-                modifier = Modifier.fillMaxWidth()
-            )
-
+            PatientTextField(nombre, onNombreChange, "Nombre de la Mascota *")
             Spacer(modifier = Modifier.height(12.dp))
 
-            OutlinedTextField(
-                value = peso,
-                onValueChange = onPesoChange,
-                label = { Text("Peso (kg) *") },
-                modifier = Modifier.fillMaxWidth()
-            )
-
+            PatientTextField(peso, onPesoChange, "Peso (kg) *")
             Spacer(modifier = Modifier.height(12.dp))
 
-            OutlinedTextField(
-                value = edad,
-                onValueChange = onEdadChange,
-                label = { Text("Edad (años) *") },
-                modifier = Modifier.fillMaxWidth()
-            )
-
+            PatientTextField(edad, onEdadChange, "Edad (años) *")
             Spacer(modifier = Modifier.height(12.dp))
+
 
             DropdownField(
                 label = "Género *",
                 value = genero,
                 options = listOf("Macho", "Hembra"),
-                onValueChange = onGeneroChange
+                onValueChange = onGeneroChange,
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -113,65 +95,32 @@ fun PatientCard(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            OutlinedTextField(
-                value = dueno,
-                onValueChange = onDuenoChange,
-                label = { Text("Nombre del Dueño *") },
-                modifier = Modifier.fillMaxWidth()
-            )
-
+            PatientTextField(dueno, onDuenoChange, "Nombre del Dueño *")
             Spacer(modifier = Modifier.height(12.dp))
 
-            OutlinedTextField(
-                value = telefono,
-                onValueChange = onTelefonoChange,
-                label = { Text("Teléfono *") },
-                modifier = Modifier.fillMaxWidth()
-            )
-
+            PatientTextField(telefono, onTelefonoChange, "Teléfono *")
             Spacer(modifier = Modifier.height(12.dp))
 
-            OutlinedTextField(
+            PatientTextField(
                 value = descripcion,
                 onValueChange = onDescripcionChange,
-                label = { Text("Descripción") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(100.dp)
+                label = "Descripción",
+                singleLine = false,
+                modifier = Modifier.height(100.dp)
             )
 
             if (mensajeError.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(12.dp))
-                Text(mensajeError, color = Color.Red)
+                Text(mensajeError, color = Color.Red, fontSize = 14.sp)
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            Row {
-                OutlinedButton(
-                    onClick = onCerrarClick,
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text("Cancelar")
-                }
-
-                Spacer(modifier = Modifier.width(12.dp))
-
-                Button(
-                    onClick = onGuardarClick,
-                    modifier = Modifier.weight(1f),
-                    enabled = !isLoading
-                ) {
-                    if (isLoading) {
-                        CircularProgressIndicator(
-                            color = Color.White,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    } else {
-                        Text("Agregar")
-                    }
-                }
-            }
+            FormActions(
+                onCancelar = onCerrarClick,
+                onGuardar = onGuardarClick,
+                isLoading = isLoading
+            )
         }
     }
 }
