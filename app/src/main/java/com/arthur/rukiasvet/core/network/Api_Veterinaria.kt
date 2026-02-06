@@ -15,7 +15,7 @@ interface Api_Veterinaria {
     @POST("auth/login")
     suspend fun login(@Body request: LoginRequest): Response<LoginResponse>
 
-    @POST("auth/register")
+    @POST("users")
     suspend fun registrarUsuario(@Body request: RegisterRequest): Response<Void>
 
     @POST("patients")
