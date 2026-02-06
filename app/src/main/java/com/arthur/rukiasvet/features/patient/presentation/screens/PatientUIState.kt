@@ -1,0 +1,18 @@
+package com.arthur.rukiasvet.features.patient.presentation.viewmodels
+
+import com.arthur.rukiasvet.features.patient.data.model.PatientResponse
+
+data class PatientUIState(
+    val nombre: String = "",
+    val peso: String = "",
+    val edad: String = "",
+    val dueno: String = "",
+    val telefono: String = "",
+    val descripcion: String = "",
+
+    val listaPacientes: List<PatientResponse> = emptyList(),
+
+    val isLoading: Boolean = false,
+    val mensajeExito: Boolean = false,
+    val mensajeError: String = ""
+)
