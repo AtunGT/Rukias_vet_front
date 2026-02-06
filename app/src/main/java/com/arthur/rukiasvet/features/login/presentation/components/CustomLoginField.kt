@@ -34,7 +34,7 @@ fun CustomLoginField(
         placeholder = {
             Text(
                 text = placeholder,
-                color = Color.Black.copy(alpha = 0.5f) // Placeholder negro suave
+                color = Color.Black.copy(alpha = 0.5f)
             )
         },
         modifier = Modifier.fillMaxWidth(),
@@ -50,17 +50,17 @@ fun CustomLoginField(
                     Icon(
                         imageVector = if (showPassword) Icons.Default.VisibilityOff else Icons.Default.Visibility,
                         contentDescription = null,
-                        tint = Color.Black // Icono negro
+                        tint = Color.Black
                     )
                 }
             }
         } else null,
         colors = OutlinedTextFieldDefaults.colors(
-            focusedTextColor = Color.Black,      // Texto negro al escribir
-            unfocusedTextColor = Color.Black,    // Texto negro al estar quieto
+            focusedTextColor = Color.Black,
+            unfocusedTextColor = Color.Black,
             focusedContainerColor = Color.Transparent,
             unfocusedContainerColor = Color.Transparent,
-            cursorColor = Color.Black,           // Palito de escritura negro
+            cursorColor = Color.Black,
             focusedBorderColor = Color(0xFF1E60F6),
             unfocusedBorderColor = Color.LightGray
         )
