@@ -2,29 +2,23 @@ package com.arthur.rukiasvet.core.utils
 
 import android.util.Base64
 import org.json.JSONObject
+import javax.inject.Inject
 
-class Tokendeco {
+class TokenDeco @Inject constructor() {
 
-    fun decodificarPayload(token: String): Map<String, String> {
-        try {
-            val parts = token.split(".")
-            if (parts.size < 2) return emptyMap()
+    fun decodePayload(token: String): Map<String, Any> {
+        val parts = token.split(".")
 
-            val payload = parts[1]
-            val decodedBytes = Base64.decode(payload, Base64.URL_SAFE)
-            val decodedString = String(decodedBytes, Charsets.UTF_8)
+        if (parts.size < 2) return emptyMap()
 
-            val jsonObject = JSONObject(decodedString)
-            val map = mutableMapOf<String, String>()
+        val payload = parts[1]
+        val decodedBytes = Base64.decode(payload, Base64.URL_SAFE)
+        val json = String(decodedBytes)
+        val jsonObject = JSONObject(json)
 
-            val iterator = jsonObject.keys()
-            while (iterator.hasNext()) {
-                val key = iterator.next()
-                map[key] = jsonObject.optString(key)
-            }
-            return map
-        } catch (e: Exception) {
-            return emptyMap()
-        }
+        val map = mutableMapOf<String, Any>()
+        jsonObject.keys().forEach { map[it] = jsonObject.get(it) }
+
+        return map
     }
 }

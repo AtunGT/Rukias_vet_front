@@ -1,4 +1,3 @@
-
 package com.arthur.rukiasvet.features.patient.presentation.screens
 
 import androidx.compose.foundation.background
@@ -17,6 +16,8 @@ import com.arthur.rukiasvet.features.patient.presentation.viewmodels.PatientView
 fun PatientScreen(
     vm: PatientViewModel,
     token: String,
+    branchId: Int = 0,
+    userId: Int = 0,
     onClose: () -> Unit
 ) {
     val state by vm.uiState.collectAsState()
@@ -32,23 +33,28 @@ fun PatientScreen(
         ) {
             PatientForm(
                 nombre = state.nombre,
-                onNombreChange = vm::onNombreChange,
+                onNombreChange = vm::onNameChange,
                 peso = state.peso,
-                onPesoChange = vm::onPesoChange,
+                onPesoChange = vm::onWeightChange,
                 edad = state.edad,
-                onEdadChange = vm::onEdadChange,
-                genero = vm.genero,
-                onGeneroChange = vm::onGeneroChange,
-                especie = vm.especie,
-                onEspecieChange = vm::onEspecieChange,
+                onEdadChange = vm::onAgeChange,
+                genero = vm.gender,
+                onGeneroChange = vm::onGenderChange,
+                especie = vm.species,
+                onEspecieChange = vm::onSpeciesChange,
                 dueno = state.dueno,
-                onDuenoChange = vm::onDuenoChange,
+                onDuenoChange = vm::onOwnerChange,
                 telefono = state.telefono,
-                onTelefonoChange = vm::onTelefonoChange,
+                onTelefonoChange = vm::onPhoneChange,
                 descripcion = state.descripcion,
-                onDescripcionChange = vm::onDescripcionChange,
+                onDescripcionChange = vm::onDescriptionChange,
                 onGuardarClick = {
-                    vm.guardarPaciente(token, onSuccess = onClose)
+                    vm.savePatient(
+                        token = token,
+                        branchId = branchId,
+                        userId = userId,
+                        onSuccess = onClose
+                    )
                 },
                 onCerrarClick = onClose,
                 isLoading = state.isLoading,

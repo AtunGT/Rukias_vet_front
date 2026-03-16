@@ -1,27 +1,28 @@
 package com.arthur.rukiasvet.features.login.data.datasources.remote.mapper
 
-import com.arthur.rukiasvet.core.utils.Tokendeco
-import com.arthur.rukiasvet.features.login.domain.entities.UsuarioSesion
+import com.arthur.rukiasvet.core.utils.TokenDeco
+import com.arthur.rukiasvet.features.login.domain.entities.UserSession
 
-fun mapTokenToSession(tokenRaw: String?, decoder: Tokendeco): UsuarioSesion {
-    if (tokenRaw.isNullOrEmpty()) {
-        return UsuarioSesion(
+
+fun mapTokenToSession(rawToken: String?, decoder: TokenDeco): UserSession {
+    if (rawToken.isNullOrEmpty()) {
+        return UserSession(
             tokenRaw = "",
-            datosDecodificados = emptyMap(),
-            esValido = false
+            decodedData = emptyMap(),
+            isValid = false
         )
     }
 
-    val tokenLimpio = tokenRaw.replace("Bearer ", "", ignoreCase = true).trim()
+    val cleanToken = rawToken.replace("Bearer ", "", ignoreCase = true).trim()
 
     return try {
-        val datos = decoder.decodificarPayload(tokenLimpio)
-        UsuarioSesion(
-            tokenRaw = tokenLimpio,
-            datosDecodificados = datos,
-            esValido = true
+        val data = decoder.decodePayload(cleanToken)
+        UserSession(
+            tokenRaw = cleanToken,
+            decodedData = data,
+            isValid = true
         )
     } catch (e: Exception) {
-        UsuarioSesion("", emptyMap(), false)
+        UserSession("", emptyMap(), false)
     }
 }

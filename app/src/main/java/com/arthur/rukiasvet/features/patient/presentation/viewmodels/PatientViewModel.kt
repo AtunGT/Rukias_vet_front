@@ -11,13 +11,16 @@ import com.arthur.rukiasvet.features.patient.domain.usecases.AddPatientUseCase
 import com.arthur.rukiasvet.features.patient.domain.usecases.DeletePatientUseCase
 import com.arthur.rukiasvet.features.patient.domain.usecases.GetAllPatientsUseCase
 import com.arthur.rukiasvet.features.patient.domain.usecases.UpdatePatientUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class PatientViewModel(
+@HiltViewModel
+class PatientViewModel @Inject constructor(
     private val addPatientUseCase: AddPatientUseCase,
     private val getAllPatientsUseCase: GetAllPatientsUseCase,
     private val deletePatientUseCase: DeletePatientUseCase,
@@ -27,51 +30,57 @@ class PatientViewModel(
     private val _uiState = MutableStateFlow(PatientUIState())
     val uiState: StateFlow<PatientUIState> = _uiState.asStateFlow()
 
-    var genero by mutableStateOf("")
-    var especie by mutableStateOf("")
+    var gender by mutableStateOf("")
+    var species by mutableStateOf("")
     var editingPatientId: Int? by mutableStateOf(null)
 
-    fun onNombreChange(v: String) { _uiState.update { it.copy(nombre = v) } }
-    fun onPesoChange(v: String) { _uiState.update { it.copy(peso = v) } }
-    fun onEdadChange(v: String) { _uiState.update { it.copy(edad = v) } }
-    fun onDuenoChange(v: String) { _uiState.update { it.copy(dueno = v) } }
-    fun onTelefonoChange(v: String) { _uiState.update { it.copy(telefono = v) } }
-    fun onDescripcionChange(v: String) { _uiState.update { it.copy(descripcion = v) } }
-    fun onGeneroChange(v: String) { genero = v }
-    fun onEspecieChange(v: String) { especie = v }
+    fun onNameChange(v: String) { _uiState.update { it.copy(nombre = v) } }
+    fun onWeightChange(v: String) { _uiState.update { it.copy(peso = v) } }
+    fun onAgeChange(v: String) { _uiState.update { it.copy(edad = v) } }
+    fun onOwnerChange(v: String) { _uiState.update { it.copy(dueno = v) } }
+    fun onPhoneChange(v: String) { _uiState.update { it.copy(telefono = v) } }
+    fun onDescriptionChange(v: String) { _uiState.update { it.copy(descripcion = v) } }
+    fun onGenderChange(v: String) { gender = v }
+    fun onSpeciesChange(v: String) { species = v }
 
-    fun cargarPacientes(token: String) {
+    fun loadPatients(token: String) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            val lista = getAllPatientsUseCase(token)
-            _uiState.update { it.copy(isLoading = false, listaPacientes = lista) }
+            val list = getAllPatientsUseCase(token)
+            _uiState.update { it.copy(isLoading = false, listaPacientes = list) }
         }
     }
 
-    fun startEdit(paciente: Patient) {
-        editingPatientId = paciente.id
-        genero = paciente.gender
-        especie = paciente.species
+    fun startEdit(patient: Patient) {
+        editingPatientId = patient.id
+        gender = patient.gender
+        species = patient.species
         _uiState.update {
             it.copy(
-                nombre = paciente.name,
-                peso = paciente.weight.toString(),
-                edad = paciente.age,
-                dueno = paciente.owner,
-                telefono = paciente.telephone,
-                descripcion = paciente.description
+                nombre = patient.name,
+                peso = patient.weight.toString(),
+                edad = patient.age,
+                dueno = patient.owner,
+                telefono = patient.telephone,
+                descripcion = patient.description
             )
         }
     }
 
-    fun deletePatient(token: String, paciente: Patient) {
+    fun deletePatient(token: String, patient: Patient) {
         viewModelScope.launch {
-            deletePatientUseCase(token, paciente.id)
-            cargarPacientes(token)
+            deletePatientUseCase(token, patient.id)
+            loadPatients(token)
         }
     }
 
-    fun guardarPaciente(token: String, onSuccess: () -> Unit) {
+    fun savePatient(
+        token: String,
+        branchId: Int,
+        userId: Int,
+        imageUrl: String = "",
+        onSuccess: () -> Unit
+    ) {
         val s = _uiState.value
 
         if (
@@ -80,22 +89,25 @@ class PatientViewModel(
             s.edad.isEmpty() ||
             s.dueno.isEmpty() ||
             s.telefono.isEmpty() ||
-            genero.isEmpty() ||
-            especie.isEmpty()
+            gender.isEmpty() ||
+            species.isEmpty()
         ) {
-            _uiState.update { it.copy(mensajeError = "Llena todos los campos") }
+            _uiState.update { it.copy(mensajeError = "Fill in all fields") }
             return
         }
 
         val request = PatientRequest(
+            branchId = branchId,
+            userId = userId,
             name = s.nombre,
-            species = especie,
+            species = species,
             description = s.descripcion,
-            gender = genero,
+            gender = gender,
             weight = s.peso.toDoubleOrNull() ?: 0.0,
             age = s.edad,
             owner = s.dueno,
-            telephone = s.telefono
+            telephone = s.telefono,
+            imageUrl = imageUrl
         )
 
         viewModelScope.launch {
@@ -108,19 +120,19 @@ class PatientViewModel(
             }
 
             if (success) {
-                limpiarFormulario()
-                cargarPacientes(token)
+                clearForm()
+                loadPatients(token)
                 onSuccess()
             } else {
-                _uiState.update { it.copy(isLoading = false, mensajeError = "Error al guardar") }
+                _uiState.update { it.copy(isLoading = false, mensajeError = "Error saving patient") }
             }
         }
     }
 
-    fun limpiarFormulario() {
+    fun clearForm() {
         editingPatientId = null
-        genero = ""
-        especie = ""
+        gender = ""
+        species = ""
         _uiState.update {
             it.copy(
                 nombre = "",

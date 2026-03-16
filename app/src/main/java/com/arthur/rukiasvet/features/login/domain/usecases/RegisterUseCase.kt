@@ -4,7 +4,7 @@ import com.arthur.rukiasvet.features.login.domain.repositories.VeterinaryReposit
 
 class RegisterUseCase(private val repository: VeterinaryRepository) {
 
-    suspend operator fun invoke(nombre: String, apellidos: String, email: String, pass: String): Boolean {
-        return repository.registrarUsuario(nombre, apellidos, email, pass)
+    suspend operator fun invoke(name: String, lastname: String, email: String, password: String): Boolean {
+        return repository.registerUser(name, lastname, email, password)
     }
 }

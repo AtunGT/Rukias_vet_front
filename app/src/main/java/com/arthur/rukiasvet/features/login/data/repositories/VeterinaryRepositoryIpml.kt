@@ -1,46 +1,48 @@
 package com.arthur.rukiasvet.features.login.data.repositories
 
-import android.util.Log
 import com.arthur.rukiasvet.core.network.Api_Veterinaria
-import com.arthur.rukiasvet.core.utils.Tokendeco
+import com.arthur.rukiasvet.core.utils.TokenDeco
 import com.arthur.rukiasvet.features.login.data.datasources.remote.mapper.mapTokenToSession
-import com.arthur.rukiasvet.features.login.domain.entities.UsuarioSesion
+import com.arthur.rukiasvet.features.login.data.model.LoginRequest
+import com.arthur.rukiasvet.features.login.data.model.RegisterRequest
+import com.arthur.rukiasvet.features.login.domain.entities.UserSession
 import com.arthur.rukiasvet.features.login.domain.repositories.VeterinaryRepository
-import com.arthur.rukiasvet.login.rukiasvet.data.model.LoginRequest
-import com.arthur.rukiasvet.login.rukiasvet.data.model.RegisterRequest
+import javax.inject.Inject
 
-
-
-class VeterinaryRepositoryImpl(
+class VeterinaryRepositoryImpl @Inject constructor(
     private val api: Api_Veterinaria,
-    private val tokendeco: Tokendeco
+    private val tokenDeco: TokenDeco
 ) : VeterinaryRepository {
 
-    override suspend fun iniciarSesion(usuario: String, contrasena: String): UsuarioSesion {
+    override suspend fun login(email: String, password: String): UserSession {
         return try {
-            val response = api.login(LoginRequest(usuario, contrasena))
+            val response = api.login(LoginRequest(email, password))
 
             if (response.isSuccessful) {
+                val token =
+                    response.headers()["Authorization"]
+                        ?: response.headers()["authorization"]
+                        ?: response.body()?.token
 
-                val tokenEncontrado = response.headers()["Authorization"]
-                    ?: response.headers()["authorization"]
-                    ?: response.body()?.token
-
-                mapTokenToSession(tokenEncontrado, tokendeco)
-
+                mapTokenToSession(token, tokenDeco)
             } else {
-                UsuarioSesion("", emptyMap(), false)
+                UserSession("", emptyMap(), false)
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            UsuarioSesion("", emptyMap(), false)
+            UserSession("", emptyMap(), false)
         }
     }
 
-    override suspend fun registrarUsuario(nombre: String, apellidos: String, email: String, pass: String): Boolean {
+    override suspend fun registerUser(
+        name: String,
+        lastname: String,
+        email: String,
+        password: String
+    ): Boolean {
         return try {
-            val request = RegisterRequest(nombre, apellidos, email, pass)
-            val response = api.registrarUsuario(request)
+            val request = RegisterRequest(name, lastname, email, password)
+            val response = api.registerUser(request)
             response.isSuccessful
         } catch (e: Exception) {
             false

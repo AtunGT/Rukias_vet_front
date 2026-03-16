@@ -1,9 +1,9 @@
 package com.arthur.rukiasvet.core.network
 
+import com.arthur.rukiasvet.features.login.data.model.LoginRequest
+import com.arthur.rukiasvet.features.login.data.model.LoginResponse
+import com.arthur.rukiasvet.features.login.data.model.RegisterRequest
 import com.arthur.rukiasvet.features.patient.data.model.PatientRequest
-import com.arthur.rukiasvet.login.rukiasvet.data.model.LoginRequest
-import com.arthur.rukiasvet.login.rukiasvet.data.model.LoginResponse
-import com.arthur.rukiasvet.login.rukiasvet.data.model.RegisterRequest
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -15,31 +15,31 @@ interface Api_Veterinaria {
     ): Response<LoginResponse>
 
     @POST("users")
-    suspend fun registrarUsuario(
+    suspend fun registerUser(
         @Body request: RegisterRequest
     ): Response<Void>
 
     @POST("patients")
-    suspend fun agregarPaciente(
+    suspend fun addPatient(
         @Header("Authorization") token: String,
-        @Body paciente: PatientRequest
+        @Body patient: PatientRequest
     ): Response<Void>
 
     @GET("patients")
-    suspend fun obtenerPacientes(
+    suspend fun getPatients(
         @Header("Authorization") token: String
     ): Response<List<PatientRequest>>
 
     @DELETE("patients/{id}")
-    suspend fun eliminarPaciente(
+    suspend fun deletePatient(
         @Header("Authorization") token: String,
         @Path("id") id: Int
     ): Response<Void>
 
     @PUT("patients/{id}")
-    suspend fun actualizarPaciente(
+    suspend fun updatePatient(
         @Header("Authorization") token: String,
         @Path("id") id: Int,
-        @Body paciente: PatientRequest
+        @Body patient: PatientRequest
     ): Response<Void>
 }

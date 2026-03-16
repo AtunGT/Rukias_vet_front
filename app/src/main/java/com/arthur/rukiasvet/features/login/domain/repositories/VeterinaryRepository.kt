@@ -1,8 +1,8 @@
 package com.arthur.rukiasvet.features.login.domain.repositories
 
-import com.arthur.rukiasvet.features.login.domain.entities.UsuarioSesion
+import com.arthur.rukiasvet.features.login.domain.entities.UserSession
 
 interface VeterinaryRepository {
-    suspend fun iniciarSesion(usuario: String, contrasena: String): UsuarioSesion
-    suspend fun registrarUsuario(nombre: String, apellidos: String, email: String, pass: String): Boolean
+    suspend fun login(email: String, password: String): UserSession
+    suspend fun registerUser(name: String, lastname: String, email: String, password: String): Boolean
 }
