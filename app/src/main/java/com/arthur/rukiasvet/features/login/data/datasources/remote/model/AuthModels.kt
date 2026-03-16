@@ -1,15 +1,13 @@
-package com.arthur.rukiasvet.login.rukiasvet.data.model
+package com.arthur.rukiasvet.features.login.data.model
 
 import com.google.gson.annotations.SerializedName
 
 data class LoginRequest(
-
-    @SerializedName("email") val usuario: String,
-    @SerializedName("password") val contrasena: String
+    @SerializedName("email") val email: String,
+    @SerializedName("password") val password: String
 )
 
 data class LoginResponse(
-
     @SerializedName("token") val token: String?
 )
 

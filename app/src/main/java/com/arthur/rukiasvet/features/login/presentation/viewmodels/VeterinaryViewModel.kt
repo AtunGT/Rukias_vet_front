@@ -6,74 +6,99 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arthur.rukiasvet.features.login.domain.repositories.VeterinaryRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class VeterinaryViewModel(
+@HiltViewModel
+class VeterinaryViewModel @Inject constructor(
     private val repository: VeterinaryRepository
 ) : ViewModel() {
-
 
     private val _uiState = MutableStateFlow(VeterinaryUIState())
     val uiState: StateFlow<VeterinaryUIState> = _uiState.asStateFlow()
 
+    var email by mutableStateOf("")
+    var password by mutableStateOf("")
 
-    var usuario by mutableStateOf("")
-    var contrasena by mutableStateOf("")
-
-    var regNombre by mutableStateOf("")
-    var regApellidos by mutableStateOf("")
+    var regName by mutableStateOf("")
+    var regLastname by mutableStateOf("")
     var regEmail by mutableStateOf("")
     var regPassword by mutableStateOf("")
     var regConfirmPassword by mutableStateOf("")
 
-    fun cambiarModo(registro: Boolean) {
-        _uiState.update { it.copy(esRegistro = registro, mensajeError = "", mensajeExito = "") }
+    fun switchMode(isRegister: Boolean) {
+        _uiState.update { it.copy(esRegistro = isRegister, mensajeError = "", mensajeExito = "") }
     }
 
-    fun iniciarSesion() {
+    fun login() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, mensajeError = "") }
-            val sesion = repository.iniciarSesion(usuario, contrasena)
 
-            if (sesion.esValido) {
+            val session = repository.login(email, password)
+
+            if (session.isValid) {
                 _uiState.update {
                     it.copy(
                         isLoading = false,
                         isLoggedIn = true,
                         nombreUsuario = "Usuario",
-                        diagnosticoReal = sesion.tokenRaw
+                        diagnosticoReal = session.tokenRaw,
+                        decodedData = session.decodedData
                     )
                 }
             } else {
-                _uiState.update { it.copy(isLoading = false, mensajeError = "Credenciales incorrectas") }
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        mensajeError = "Credenciales incorrectas"
+                    )
+                }
             }
         }
     }
 
-    fun registrar() {
+    fun register() {
         if (regPassword != regConfirmPassword) {
             _uiState.update { it.copy(mensajeError = "Las contraseñas no coinciden") }
             return
         }
+
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, mensajeError = "") }
-            val exito = repository.registrarUsuario(regNombre, regApellidos, regEmail, regPassword)
 
-            if (exito) {
-                _uiState.update { it.copy(isLoading = false, mensajeExito = "Registro exitoso. Inicia sesión.") }
+            val success = repository.registerUser(
+                regName,
+                regLastname,
+                regEmail,
+                regPassword
+            )
 
+            if (success) {
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        mensajeExito = "Registro exitoso. Inicia sesión."
+                    )
+                }
             } else {
-                _uiState.update { it.copy(isLoading = false, mensajeError = "Error al registrar") }
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        mensajeError = "Error al registrar"
+                    )
+                }
             }
         }
     }
 
-    fun cerrarSesion() {
+    fun logout() {
         _uiState.update { VeterinaryUIState() }
-        usuario = ""; contrasena = ""
+        email = ""
+        password = ""
     }
 }

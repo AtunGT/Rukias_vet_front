@@ -4,6 +4,7 @@ data class VeterinaryUIState(
     val nombreUsuario: String = "",
     val esRegistro: Boolean = false,
     val diagnosticoReal: String = "",
+    val decodedData: Map<String, Any> = emptyMap(),
     val isLoggedIn: Boolean = false,
     val isLoading: Boolean = false,
     val mensajeError: String = "",

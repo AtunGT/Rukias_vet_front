@@ -1,7 +1,7 @@
 package com.arthur.rukiasvet.features.login.domain.entities
 
-data class UsuarioSesion(
+data class UserSession(
     val tokenRaw: String,
-    val datosDecodificados: Map<String, String>,
-    val esValido: Boolean
+    val decodedData: Map<String, Any>,
+    val isValid: Boolean
 )

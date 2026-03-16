@@ -34,7 +34,7 @@ fun HomeScreen(
     val state by patientVm.uiState.collectAsState()
 
     LaunchedEffect(Unit) {
-        patientVm.cargarPacientes(token)
+        patientVm.loadPatients(token)
     }
 
     Scaffold(
@@ -42,7 +42,7 @@ fun HomeScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    patientVm.limpiarFormulario()
+                    patientVm.clearForm()
                     onAddPatientClick()
                 },
                 containerColor = Color(0xFF1E60F6),
