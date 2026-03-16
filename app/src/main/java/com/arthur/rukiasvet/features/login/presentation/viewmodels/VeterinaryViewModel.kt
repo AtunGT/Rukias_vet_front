@@ -16,7 +16,6 @@ class VeterinaryViewModel(
     private val repository: VeterinaryRepository
 ) : ViewModel() {
 
-
     private val _uiState = MutableStateFlow(VeterinaryUIState())
     val uiState: StateFlow<VeterinaryUIState> = _uiState.asStateFlow()
 
