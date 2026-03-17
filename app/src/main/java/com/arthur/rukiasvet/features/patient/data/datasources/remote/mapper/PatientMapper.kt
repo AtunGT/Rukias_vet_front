@@ -1,9 +1,9 @@
 package com.arthur.rukiasvet.features.patient.data.datasources.remote.mapper
 
-import com.arthur.rukiasvet.features.patient.data.model.PatientRequest
+import com.arthur.rukiasvet.features.patient.data.model.PatientResponse
 import com.arthur.rukiasvet.features.patient.domain.model.Patient
 
-fun PatientRequest.toDomain(): Patient {
+fun PatientResponse.toDomain(): Patient {
     return Patient(
         id = this.id ?: 0,
         name = this.name,
@@ -13,10 +13,10 @@ fun PatientRequest.toDomain(): Patient {
         weight = this.weight,
         age = this.age,
         owner = this.owner,
-        telephone = this.telephone
+        telephone = this.telephone,
+        branchId = this.branchId,
+        imageUrl = this.imageUrl
     )
 }
 
-fun List<PatientRequest>.toDomain(): List<Patient> {
-    return this.map { it.toDomain() }
-}
+fun List<PatientResponse>.toDomain(): List<Patient> = map { it.toDomain() }

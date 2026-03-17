@@ -2,6 +2,7 @@ package com.arthur.rukiasvet.features.patient.domain.usecases
 
 import com.arthur.rukiasvet.features.patient.data.model.PatientRequest
 import com.arthur.rukiasvet.features.patient.domain.repositories.PatientRepository
+import java.io.File
 import javax.inject.Inject
 
 class UpdatePatientUseCase @Inject constructor(
@@ -10,8 +11,7 @@ class UpdatePatientUseCase @Inject constructor(
     suspend operator fun invoke(
         token: String,
         id: Int,
-        patient: PatientRequest
-    ): Boolean {
-        return repository.updatePatient(token, id, patient)
-    }
+        patient: PatientRequest,
+        imageFile: File? = null
+    ): Boolean = repository.updatePatient(token, id, patient, imageFile)
 }

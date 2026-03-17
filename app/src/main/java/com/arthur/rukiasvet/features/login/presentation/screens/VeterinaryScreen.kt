@@ -15,54 +15,15 @@ import com.arthur.rukiasvet.features.login.presentation.components.RegisterCard
 import com.arthur.rukiasvet.features.login.presentation.components.VeterinaryCard
 import com.arthur.rukiasvet.features.login.presentation.viewmodels.VeterinaryUIState
 import com.arthur.rukiasvet.features.login.presentation.viewmodels.VeterinaryViewModel
-import com.arthur.rukiasvet.features.patient.presentation.screens.HomeScreen
 import com.arthur.rukiasvet.features.patient.presentation.screens.PatientScreen
 import com.arthur.rukiasvet.features.patient.presentation.viewmodels.PatientViewModel
 
 @Composable
 fun VeterinaryScreen() {
+    val vm: VeterinaryViewModel = hiltViewModel()
+    val state by vm.uiState.collectAsStateWithLifecycle()
 
-    val loginVm: VeterinaryViewModel = hiltViewModel()
-    val patientVm: PatientViewModel = hiltViewModel()
-
-    val state by loginVm.uiState.collectAsStateWithLifecycle()
-
-    var showAddPatient by remember { mutableStateOf(false) }
-
-    if (state.isLoggedIn) {
-
-        val branchId = (state.decodedData["idbranch"] as? Int) ?: 0
-        val userId = (state.decodedData["iduser"] as? Int) ?: 0
-
-        HomeScreen(
-            nombreUsuario = state.nombreUsuario,
-            token = state.diagnosticoReal,
-            patientVm = patientVm,
-            onCerrarSesion = { loginVm.logout() },
-            onAddPatientClick = { showAddPatient = true }
-        )
-
-        if (showAddPatient) {
-            Dialog(
-                onDismissRequest = { showAddPatient = false },
-                properties = DialogProperties(usePlatformDefaultWidth = false)
-            ) {
-                PatientScreen(
-                    vm = patientVm,
-                    token = state.diagnosticoReal,
-                    branchId = branchId,
-                    userId = userId,
-                    onClose = { showAddPatient = false }
-                )
-            }
-        }
-
-    } else {
-        LoginOrRegisterContent(
-            vm = loginVm,
-            state = state
-        )
-    }
+    LoginOrRegisterContent(vm = vm, state = state)
 }
 
 @Composable

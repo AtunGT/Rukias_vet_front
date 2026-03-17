@@ -9,5 +9,7 @@ data class Patient(
     val weight: Double,
     val age: String,
     val owner: String,
-    val telephone: String
+    val telephone: String,
+    val branchId: Int,
+    val imageUrl: String? = null
 )

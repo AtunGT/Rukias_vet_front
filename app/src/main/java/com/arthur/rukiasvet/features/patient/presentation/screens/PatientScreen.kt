@@ -38,9 +38,9 @@ fun PatientScreen(
                 onPesoChange = vm::onWeightChange,
                 edad = state.edad,
                 onEdadChange = vm::onAgeChange,
-                genero = vm.gender,
+                genero = state.genero,
                 onGeneroChange = vm::onGenderChange,
-                especie = vm.species,
+                especie = state.especie,
                 onEspecieChange = vm::onSpeciesChange,
                 dueno = state.dueno,
                 onDuenoChange = vm::onOwnerChange,
@@ -50,7 +50,6 @@ fun PatientScreen(
                 onDescripcionChange = vm::onDescriptionChange,
                 onGuardarClick = {
                     vm.savePatient(
-                        token = token,
                         branchId = branchId,
                         userId = userId,
                         onSuccess = onClose

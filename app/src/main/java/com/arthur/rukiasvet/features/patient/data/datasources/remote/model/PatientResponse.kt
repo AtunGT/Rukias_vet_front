@@ -16,3 +16,17 @@ data class PatientRequest(
     @SerializedName("telephone") val telephone: String,
     @SerializedName("imageurl") val imageUrl: String
 )
+
+data class PatientResponse(
+    @SerializedName("IdPatient") val id: Int,
+    @SerializedName("Name") val name: String,
+    @SerializedName("Species") val species: String,
+    @SerializedName("Gender") val gender: String,
+    @SerializedName("Description") val description: String,
+    @SerializedName("Weight") val weight: Double,
+    @SerializedName("Age") val age: String,
+    @SerializedName("Owner") val owner: String,
+    @SerializedName("Telephone") val telephone: String,
+    @SerializedName("BranchID") val branchId: Int,
+    @SerializedName("ImageURL") val imageUrl: String = ""
+)

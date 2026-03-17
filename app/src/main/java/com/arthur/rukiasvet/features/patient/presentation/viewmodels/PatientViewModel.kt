@@ -1,60 +1,100 @@
 package com.arthur.rukiasvet.features.patient.presentation.viewmodels
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arthur.rukiasvet.core.session.SessionRepository
 import com.arthur.rukiasvet.features.patient.data.model.PatientRequest
 import com.arthur.rukiasvet.features.patient.domain.model.Patient
 import com.arthur.rukiasvet.features.patient.domain.usecases.AddPatientUseCase
 import com.arthur.rukiasvet.features.patient.domain.usecases.DeletePatientUseCase
 import com.arthur.rukiasvet.features.patient.domain.usecases.GetAllPatientsUseCase
+import com.arthur.rukiasvet.features.patient.domain.usecases.GetPatientByIdUseCase
+import com.arthur.rukiasvet.features.patient.domain.usecases.GetPatientsByBranchUseCase
 import com.arthur.rukiasvet.features.patient.domain.usecases.UpdatePatientUseCase
+import com.arthur.rukiasvet.features.patient.presentation.screens.PatientUIState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.io.File
+import javax.inject.Inject
 
 @HiltViewModel
 class PatientViewModel @Inject constructor(
     private val addPatientUseCase: AddPatientUseCase,
     private val getAllPatientsUseCase: GetAllPatientsUseCase,
+    private val getPatientsByBranchUseCase: GetPatientsByBranchUseCase,
     private val deletePatientUseCase: DeletePatientUseCase,
-    private val updatePatientUseCase: UpdatePatientUseCase
+    private val updatePatientUseCase: UpdatePatientUseCase,
+    private val getPatientByIdUseCase: GetPatientByIdUseCase,
+    private val sessionRepository: SessionRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(PatientUIState())
     val uiState: StateFlow<PatientUIState> = _uiState.asStateFlow()
 
-    var gender by mutableStateOf("")
-    var species by mutableStateOf("")
-    var editingPatientId: Int? by mutableStateOf(null)
+    private val _capturedImageFile = MutableStateFlow<File?>(null)
+    val capturedImageFile: StateFlow<File?> = _capturedImageFile.asStateFlow()
 
-    fun onNameChange(v: String) { _uiState.update { it.copy(nombre = v) } }
-    fun onWeightChange(v: String) { _uiState.update { it.copy(peso = v) } }
-    fun onAgeChange(v: String) { _uiState.update { it.copy(edad = v) } }
-    fun onOwnerChange(v: String) { _uiState.update { it.copy(dueno = v) } }
-    fun onPhoneChange(v: String) { _uiState.update { it.copy(telefono = v) } }
-    fun onDescriptionChange(v: String) { _uiState.update { it.copy(descripcion = v) } }
-    fun onGenderChange(v: String) { gender = v }
-    fun onSpeciesChange(v: String) { species = v }
+    var editingPatientId: Int? = null
+        private set
 
-    fun loadPatients(token: String) {
+    fun onNameChange(value: String) { _uiState.update { it.copy(nombre = value) } }
+    fun onWeightChange(value: String) { _uiState.update { it.copy(peso = value) } }
+    fun onAgeChange(value: String) { _uiState.update { it.copy(edad = value) } }
+    fun onOwnerChange(value: String) { _uiState.update { it.copy(dueno = value) } }
+    fun onPhoneChange(value: String) { _uiState.update { it.copy(telefono = value) } }
+    fun onDescriptionChange(value: String) { _uiState.update { it.copy(descripcion = value) } }
+
+
+    fun onGenderChange(value: String) { _uiState.update { it.copy(genero = value) } }
+    fun onSpeciesChange(value: String) { _uiState.update { it.copy(especie = value) } }
+
+    fun setCapturedImage(file: File) {
+        _capturedImageFile.value = file
+    }
+
+    fun clearImage() {
+        _capturedImageFile.value = null
+    }
+
+    fun loadPatients() {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
+            val token = sessionRepository.getToken() ?: run {
+                _uiState.update { it.copy(mensajeError = "Sesión no válida") }
+                return@launch
+            }
+            _uiState.update { it.copy(isLoading = true, mensajeError = "") }
             val list = getAllPatientsUseCase(token)
             _uiState.update { it.copy(isLoading = false, listaPacientes = list) }
         }
     }
 
+    fun loadPatientsByBranch(branchId: Int) {
+        viewModelScope.launch {
+            val token = sessionRepository.getToken() ?: run {
+                _uiState.update { it.copy(mensajeError = "Sesión no válida") }
+                return@launch
+            }
+            _uiState.update { it.copy(isLoading = true, mensajeError = "") }
+            val list = getPatientsByBranchUseCase(token, branchId)
+            _uiState.update { it.copy(isLoading = false, listaPacientes = list) }
+        }
+    }
+
+    fun loadPatientForEdit(id: Int) {
+        viewModelScope.launch {
+            val token = sessionRepository.getToken() ?: return@launch
+            val patient = getPatientByIdUseCase(token, id)
+            patient?.let { startEdit(it) }
+                ?: _uiState.update { it.copy(mensajeError = "No se pudo cargar el paciente") }
+        }
+    }
+
     fun startEdit(patient: Patient) {
         editingPatientId = patient.id
-        gender = patient.gender
-        species = patient.species
         _uiState.update {
             it.copy(
                 nombre = patient.name,
@@ -62,89 +102,83 @@ class PatientViewModel @Inject constructor(
                 edad = patient.age,
                 dueno = patient.owner,
                 telefono = patient.telephone,
-                descripcion = patient.description
+                descripcion = patient.description,
+                genero = patient.gender,
+                especie = patient.species
             )
         }
     }
 
-    fun deletePatient(token: String, patient: Patient) {
+    fun deletePatient(patient: Patient, branchId: Int? = null) {
         viewModelScope.launch {
-            deletePatientUseCase(token, patient.id)
-            loadPatients(token)
+            val token = sessionRepository.getToken() ?: return@launch
+            _uiState.update { it.copy(isLoading = true) }
+            val success = deletePatientUseCase(token, patient.id)
+            if (success) {
+                if (branchId != null) loadPatientsByBranch(branchId)
+                else loadPatients()
+            } else {
+                _uiState.update { it.copy(isLoading = false, mensajeError = "Error al eliminar") }
+            }
         }
     }
 
-    fun savePatient(
-        token: String,
-        branchId: Int,
-        userId: Int,
-        imageUrl: String = "",
-        onSuccess: () -> Unit
-    ) {
+    fun savePatient(branchId: Int, userId: Int, onSuccess: () -> Unit) {
         val s = _uiState.value
-
-        if (
-            s.nombre.isEmpty() ||
-            s.peso.isEmpty() ||
-            s.edad.isEmpty() ||
-            s.dueno.isEmpty() ||
-            s.telefono.isEmpty() ||
-            gender.isEmpty() ||
-            species.isEmpty()
-        ) {
-            _uiState.update { it.copy(mensajeError = "Fill in all fields") }
-            return
-        }
+        if (!validateFields(s)) return
 
         val request = PatientRequest(
             branchId = branchId,
             userId = userId,
             name = s.nombre,
-            species = species,
+            species = s.especie,
             description = s.descripcion,
-            gender = gender,
+            gender = s.genero,
             weight = s.peso.toDoubleOrNull() ?: 0.0,
             age = s.edad,
             owner = s.dueno,
             telephone = s.telefono,
-            imageUrl = imageUrl
+            imageUrl = ""
         )
 
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
+            val token = sessionRepository.getToken() ?: run {
+                _uiState.update { it.copy(mensajeError = "Sesión no válida") }
+                return@launch
+            }
+            _uiState.update { it.copy(isLoading = true, mensajeError = "") }
 
+            val imageFile = _capturedImageFile.value
             val success = if (editingPatientId == null) {
-                addPatientUseCase(token, request)
+                addPatientUseCase(token, request, imageFile)
             } else {
-                updatePatientUseCase(token, editingPatientId!!, request)
+                updatePatientUseCase(token, editingPatientId!!, request, imageFile)
             }
 
             if (success) {
                 clearForm()
-                loadPatients(token)
                 onSuccess()
             } else {
-                _uiState.update { it.copy(isLoading = false, mensajeError = "Error saving patient") }
+                _uiState.update { it.copy(isLoading = false, mensajeError = "Error al guardar") }
             }
         }
     }
 
+    private fun validateFields(s: PatientUIState): Boolean {
+        val valid = s.nombre.isNotBlank() && s.peso.isNotBlank() &&
+                s.edad.isNotBlank() && s.dueno.isNotBlank() &&
+                s.telefono.isNotBlank() && s.genero.isNotBlank() && s.especie.isNotBlank()
+        if (!valid) _uiState.update { it.copy(mensajeError = "Todos los campos son obligatorios") }
+        return valid
+    }
+
     fun clearForm() {
         editingPatientId = null
-        gender = ""
-        species = ""
-        _uiState.update {
-            it.copy(
-                nombre = "",
-                peso = "",
-                edad = "",
-                dueno = "",
-                telefono = "",
-                descripcion = "",
-                mensajeError = "",
-                mensajeExito = false,
-                isLoading = false
-            )
-        }
+        clearImage()
+        _uiState.update { PatientUIState() }
+    }
+
+    fun clearMessages() {
+        _uiState.update { it.copy(mensajeError = "", mensajeExito = false) }
     }
 }

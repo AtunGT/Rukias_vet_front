@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arthur.rukiasvet.core.session.SessionManager
 import com.arthur.rukiasvet.features.login.domain.repositories.VeterinaryRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -16,7 +17,8 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 class VeterinaryViewModel @Inject constructor(
-    private val repository: VeterinaryRepository
+    private val repository: VeterinaryRepository,
+    private val sessionManager: SessionManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(VeterinaryUIState())
@@ -42,6 +44,10 @@ class VeterinaryViewModel @Inject constructor(
             val session = repository.login(email, password)
 
             if (session.isValid) {
+                val userId = (session.decodedData["iduser"] as? Int) ?: 0
+
+                sessionManager.login(session.tokenRaw, userId)
+
                 _uiState.update {
                     it.copy(
                         isLoading = false,
@@ -59,6 +65,15 @@ class VeterinaryViewModel @Inject constructor(
                     )
                 }
             }
+        }
+    }
+
+    fun logout() {
+        viewModelScope.launch {
+            sessionManager.logout()
+            _uiState.update { VeterinaryUIState() }
+            email = ""
+            password = ""
         }
     }
 
@@ -96,9 +111,4 @@ class VeterinaryViewModel @Inject constructor(
         }
     }
 
-    fun logout() {
-        _uiState.update { VeterinaryUIState() }
-        email = ""
-        password = ""
-    }
 }

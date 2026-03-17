@@ -8,6 +8,6 @@ import javax.inject.Inject
 class GetAllPatientsUseCase @Inject constructor(private val repository: PatientRepository) {
 
     suspend operator fun invoke(token: String): List<Patient> {
-        return repository.getPatients(token).toDomain()
+        return repository.getPatients(token)
     }
 }

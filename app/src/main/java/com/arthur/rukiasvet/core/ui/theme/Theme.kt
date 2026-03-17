@@ -269,7 +269,10 @@ fun AppTheme(
     }
 
     MaterialTheme(
-        colorScheme = colorScheme,
+        colorScheme = lightColorScheme(
+            background = Color.White,
+            surface = Color.White
+        ),
         typography = AppTypography,
         content = content
     )

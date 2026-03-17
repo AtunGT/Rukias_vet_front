@@ -1,4 +1,4 @@
-package com.arthur.rukiasvet.features.patient.presentation.components
+package com.arthur.rukiasvet.core.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun EmptyState() {
     Card(
-        modifier = Modifier
+        modifier = Modifier.Companion
             .fillMaxWidth()
             .height(240.dp),
         shape = RoundedCornerShape(16.dp),
@@ -36,15 +36,9 @@ fun EmptyState() {
             Text("🐾", fontSize = 48.sp)
             Spacer(modifier = Modifier.height(12.dp))
             Text(
-                text = "No hay pacientes registrados",
-                fontWeight = FontWeight.Bold,
+                text = "No hay datos",
+                fontWeight = FontWeight.Companion.Bold,
                 fontSize = 16.sp
-            )
-            Spacer(modifier = Modifier.height(6.dp))
-            Text(
-                text = "Agrega tu primer paciente",
-                color = Color.Gray,
-                fontSize = 14.sp
             )
         }
     }
