@@ -4,6 +4,7 @@ import android.util.Log
 import com.arthur.rukiasvet.core.database.dao.ProductDao
 import com.arthur.rukiasvet.core.network.Api_Veterinaria
 import com.arthur.rukiasvet.features.product.data.datasources.remote.mapper.toDomain
+import com.arthur.rukiasvet.features.product.data.datasources.remote.mapper.toEntity
 import com.arthur.rukiasvet.features.product.data.model.ProductRequest
 import com.arthur.rukiasvet.features.product.domain.model.Product
 import com.arthur.rukiasvet.features.product.domain.repositories.ProductRepository
@@ -27,21 +28,14 @@ class ProductRepositoryImpl @Inject constructor(
             val stockPart       = product.stock.toString().toRequestBody("text/plain".toMediaTypeOrNull())
             val categoryPart    = product.category.toRequestBody("text/plain".toMediaTypeOrNull())
             val branchIdPart    = product.branchId.toString().toRequestBody("text/plain".toMediaTypeOrNull())
-
             val imagePart = imageFile?.let {
                 val requestFile = it.asRequestBody("image/*".toMediaTypeOrNull())
                 MultipartBody.Part.createFormData("image", it.name, requestFile)
             }
-
             val response = api.addProduct(
-                token       = "Bearer $token",
-                name        = namePart,
-                description = descriptionPart,
-                price       = pricePart,
-                stock       = stockPart,
-                category    = categoryPart,
-                branchId    = branchIdPart,
-                image       = imagePart
+                token = "Bearer $token", name = namePart, description = descriptionPart,
+                price = pricePart, stock = stockPart, category = categoryPart,
+                branchId = branchIdPart, image = imagePart
             )
             Log.d("ProductRepo", "Add code: ${response.code()}")
             response.isSuccessful
@@ -59,22 +53,14 @@ class ProductRepositoryImpl @Inject constructor(
             val stockPart       = product.stock.toString().toRequestBody("text/plain".toMediaTypeOrNull())
             val categoryPart    = product.category.toRequestBody("text/plain".toMediaTypeOrNull())
             val branchIdPart    = product.branchId.toString().toRequestBody("text/plain".toMediaTypeOrNull())
-
             val imagePart = imageFile?.let {
                 val requestFile = it.asRequestBody("image/*".toMediaTypeOrNull())
                 MultipartBody.Part.createFormData("image", it.name, requestFile)
             }
-
             val response = api.updateProduct(
-                token       = "Bearer $token",
-                id          = id,
-                name        = namePart,
-                description = descriptionPart,
-                price       = pricePart,
-                stock       = stockPart,
-                category    = categoryPart,
-                branchId    = branchIdPart,
-                image       = imagePart
+                token = "Bearer $token", id = id, name = namePart, description = descriptionPart,
+                price = pricePart, stock = stockPart, category = categoryPart,
+                branchId = branchIdPart, image = imagePart
             )
             Log.d("ProductRepo", "Update code: ${response.code()}")
             response.isSuccessful
@@ -87,9 +73,18 @@ class ProductRepositoryImpl @Inject constructor(
     override suspend fun getProductsByBranch(token: String, branchId: Int): List<Product> {
         return try {
             val response = api.getProductsByBranch("Bearer $token", branchId)
-            if (response.isSuccessful) response.body()?.toDomain() ?: emptyList()
-            else emptyList()
-        } catch (e: Exception) { emptyList() }
+            if (response.isSuccessful) {
+                val list = response.body()?.toDomain() ?: emptyList()
+                productDao.deleteByBranch(branchId)
+                productDao.insertAll(list.map { it.toEntity() })
+                list
+            } else {
+                productDao.getByBranch(branchId).map { it.toDomain() }
+            }
+        } catch (e: Exception) {
+            Log.d("ProductRepo", "Sin internet, cargando desde Room")
+            productDao.getByBranch(branchId).map { it.toDomain() }
+        }
     }
 
     override suspend fun deleteProduct(token: String, id: Int): Boolean {
