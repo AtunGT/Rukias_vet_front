@@ -1,26 +1,30 @@
 package com.arthur.rukiasvet.features.branch.presentation.screens
 
-
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import com.arthur.rukiasvet.features.patient.domain.model.Patient
 import com.arthur.rukiasvet.features.patient.presentation.screens.PatientList
-import com.arthur.rukiasvet.features.branch.presentation.screens.BranchUIState
 import com.arthur.rukiasvet.features.patient.presentation.screens.PatientUIState
+import com.arthur.rukiasvet.features.product.domain.model.Product
+import com.arthur.rukiasvet.features.product.presentation.screens.ProductListScreen
+import com.arthur.rukiasvet.features.product.presentation.viewmodels.ProductViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BranchDetailScreen(
     branchId: Int,
     patientState: PatientUIState,
+    productViewModel: ProductViewModel,
     onAddPatientClick: () -> Unit,
+    onAddProductClick: () -> Unit,
     onEditPatient: (Patient) -> Unit,
+    onEditProduct: (Product) -> Unit,
     onDeletePatient: (Patient) -> Unit,
     onBack: () -> Unit
 ) {
@@ -46,9 +50,11 @@ fun BranchDetailScreen(
             }
         }
     ) { padding ->
-        Column(modifier = Modifier
-            .fillMaxSize()
-            .padding(padding)) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
             TabRow(selectedTabIndex = selectedTab) {
                 tabs.forEachIndexed { index, title ->
                     Tab(
@@ -88,9 +94,12 @@ fun BranchDetailScreen(
                     }
                 }
                 1 -> {
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        Text("Productos (próximamente)")
-                    }
+                    ProductListScreen(
+                        branchId = branchId,
+                        onAddProductClick = onAddProductClick,
+                        onEditProduct = onEditProduct,
+                        viewModel = productViewModel
+                    )
                 }
             }
         }

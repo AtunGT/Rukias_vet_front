@@ -7,10 +7,12 @@ import com.arthur.rukiasvet.features.login.data.model.LoginResponse
 import com.arthur.rukiasvet.features.login.data.model.RegisterRequest
 import com.arthur.rukiasvet.features.patient.data.model.PatientRequest
 import com.arthur.rukiasvet.features.patient.data.model.PatientResponse
+import com.arthur.rukiasvet.features.product.data.model.ProductRequest
+import com.arthur.rukiasvet.features.product.data.model.ProductResponse
 import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.Response
 import retrofit2.http.*
-import okhttp3.RequestBody
 
 interface Api_Veterinaria {
 
@@ -79,6 +81,51 @@ interface Api_Veterinaria {
         @Part("branch_id") branchId: RequestBody,
         @Part image: MultipartBody.Part?
     ): Response<PatientRequest>
+
+    @GET("products")
+    suspend fun getProductsByBranch(
+        @Header("Authorization") token: String,
+        @Query("branch_id") branchId: Int
+    ): Response<List<ProductResponse>>
+
+    @GET("products/{id}")
+    suspend fun getProductById(
+        @Header("Authorization") token: String,
+        @Path("id") id: Int
+    ): Response<ProductResponse>
+
+    @DELETE("products/{id}")
+    suspend fun deleteProduct(
+        @Header("Authorization") token: String,
+        @Path("id") id: Int
+    ): Response<Unit>
+
+    @Multipart
+    @POST("products")
+    suspend fun addProduct(
+        @Header("Authorization") token: String,
+        @Part("name") name: RequestBody,
+        @Part("description") description: RequestBody,
+        @Part("price") price: RequestBody,
+        @Part("stock") stock: RequestBody,
+        @Part("type") category: RequestBody,
+        @Part("branch_id") branchId: RequestBody,
+        @Part image: MultipartBody.Part?
+    ): Response<ProductRequest>
+
+    @Multipart
+    @PUT("products/{id}")
+    suspend fun updateProduct(
+        @Header("Authorization") token: String,
+        @Path("id") id: Int,
+        @Part("name") name: RequestBody,
+        @Part("description") description: RequestBody,
+        @Part("price") price: RequestBody,
+        @Part("stock") stock: RequestBody,
+        @Part("type") category: RequestBody,
+        @Part("branch_id") branchId: RequestBody,
+        @Part image: MultipartBody.Part?
+    ): Response<ProductRequest>
 
     @POST("branches")
     suspend fun addBranch(

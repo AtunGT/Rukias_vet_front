@@ -9,18 +9,21 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.toRoute
 import com.arthur.rukiasvet.core.navigation.BranchDetail
 import com.arthur.rukiasvet.core.navigation.Branches
 import com.arthur.rukiasvet.core.navigation.FeatureNavGraph
 import com.arthur.rukiasvet.core.navigation.PatientForm
+import com.arthur.rukiasvet.core.navigation.ProductForm
 import com.arthur.rukiasvet.core.session.SessionManager
 import com.arthur.rukiasvet.features.branch.presentation.screens.BranchDetailScreen
 import com.arthur.rukiasvet.features.branch.presentation.screens.BranchListScreen
-import com.arthur.rukiasvet.features.patient.presentation.screens.PatientFormScreen
 import com.arthur.rukiasvet.features.branch.presentation.viewmodels.BranchViewModel
+import com.arthur.rukiasvet.features.patient.presentation.screens.PatientFormScreen
 import com.arthur.rukiasvet.features.patient.presentation.viewmodels.PatientViewModel
-import kotlinx.coroutines.delay
+import com.arthur.rukiasvet.features.product.presentation.screens.ProductFormScreen
+import com.arthur.rukiasvet.features.product.presentation.viewmodels.ProductViewModel
 import javax.inject.Inject
 
 class BranchNavGraph @Inject constructor(
@@ -63,21 +66,34 @@ class BranchNavGraph @Inject constructor(
             )
         }
 
-
         navGraphBuilder.composable<BranchDetail> { backStackEntry ->
             val args = backStackEntry.toRoute<BranchDetail>()
             val branchId = args.branchId
 
             val patientViewModel: PatientViewModel = hiltViewModel()
             val patientState by patientViewModel.uiState.collectAsStateWithLifecycle()
+            val productViewModel: ProductViewModel = hiltViewModel()
 
             LaunchedEffect(branchId) {
                 patientViewModel.loadPatientsByBranch(branchId)
+                productViewModel.loadProductsByBranch(branchId)
+            }
+
+            val currentBackStack by navController.currentBackStackEntryAsState()
+            LaunchedEffect(currentBackStack) {
+                val currentRoute = currentBackStack?.destination?.route
+                if (currentRoute == BranchDetail::class.qualifiedName ||
+                    currentRoute?.contains("BranchDetail") == true
+                ) {
+                    productViewModel.loadProductsByBranch(branchId)
+                    patientViewModel.loadPatientsByBranch(branchId)
+                }
             }
 
             BranchDetailScreen(
                 branchId = branchId,
                 patientState = patientState,
+                productViewModel = productViewModel,
                 onAddPatientClick = {
                     navController.navigate(PatientForm(branchId = branchId, patientId = null))
                 },
@@ -87,10 +103,15 @@ class BranchNavGraph @Inject constructor(
                 onDeletePatient = { patient ->
                     patientViewModel.deletePatient(patient, branchId)
                 },
+                onAddProductClick = {
+                    navController.navigate(ProductForm(branchId = branchId, productId = null))
+                },
+                onEditProduct = { product ->
+                    navController.navigate(ProductForm(branchId = branchId, productId = product.id))
+                },
                 onBack = { navController.popBackStack() }
             )
         }
-
 
         navGraphBuilder.composable<PatientForm> { backStackEntry ->
             val args = backStackEntry.toRoute<PatientForm>()
@@ -117,6 +138,23 @@ class BranchNavGraph @Inject constructor(
                     navController.popBackStack()
                 }
             }
+        }
+
+        navGraphBuilder.composable<ProductForm> { backStackEntry ->
+            val args = backStackEntry.toRoute<ProductForm>()
+            val productViewModel: ProductViewModel = hiltViewModel()
+
+            LaunchedEffect(args.productId) {
+                args.productId?.let { id ->
+                    productViewModel.loadProductForEdit(id)
+                }
+            }
+
+            ProductFormScreen(
+                vm = productViewModel,
+                branchId = args.branchId,
+                onClose = { navController.popBackStack() }
+            )
         }
     }
 }

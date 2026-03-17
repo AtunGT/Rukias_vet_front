@@ -1,6 +1,7 @@
 package com.arthur.rukiasvet.features.patient.data.repositories
 
 import android.util.Log
+import com.arthur.rukiasvet.core.database.dao.PatientDao
 import com.arthur.rukiasvet.core.network.Api_Veterinaria
 import com.arthur.rukiasvet.features.patient.data.datasources.remote.mapper.toDomain
 import com.arthur.rukiasvet.features.patient.data.model.PatientRequest
@@ -15,7 +16,8 @@ import java.io.File
 import javax.inject.Inject
 
 class PatientRepositoryImpl @Inject constructor(
-    private val api: Api_Veterinaria
+    private val api: Api_Veterinaria,
+    private val patientDao: PatientDao
 ) : PatientRepository {
 
     override suspend fun addPatient(

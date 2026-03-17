@@ -1,5 +1,7 @@
 package com.arthur.rukiasvet.features.branch.data.repositories
 
+import com.arthur.rukiasvet.core.database.dao.BranchDao
+import com.arthur.rukiasvet.core.database.dao.ProductDao
 import com.arthur.rukiasvet.core.network.Api_Veterinaria
 import com.arthur.rukiasvet.features.branch.data.datasources.remote.mapper.toDomain
 import com.arthur.rukiasvet.features.branch.data.model.BranchRequest
@@ -8,7 +10,8 @@ import com.arthur.rukiasvet.features.branch.domain.repositories.BranchRepository
 import javax.inject.Inject
 
 class BranchRepositoryImpl @Inject constructor(
-    private val api: Api_Veterinaria
+    private val api: Api_Veterinaria,
+    private val branchDao: BranchDao
 ) : BranchRepository {
 
     override suspend fun addBranch(token: String, branch: BranchRequest): Boolean {
