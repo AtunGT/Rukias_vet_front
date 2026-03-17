@@ -14,14 +14,10 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 abstract class SessionModule {
 
-    @Binds
-    @Singleton
-    abstract fun bindSessionManager(
-        impl: SessionManagerImpl
-    ): SessionManager
+    @Binds @Singleton
+    abstract fun bindSessionManager(impl: SessionManagerImpl): SessionManager
 
-    @Binds
-    @Singleton
+    @Binds @Singleton
     abstract fun bindSessionRepository(
         impl: SessionRepositoryImpl
     ): SessionRepository

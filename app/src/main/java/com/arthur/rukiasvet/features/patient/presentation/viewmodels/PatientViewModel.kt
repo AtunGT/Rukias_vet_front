@@ -1,5 +1,6 @@
 package com.arthur.rukiasvet.features.patient.presentation.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arthur.rukiasvet.core.session.SessionRepository
@@ -74,12 +75,18 @@ class PatientViewModel @Inject constructor(
 
     fun loadPatientsByBranch(branchId: Int) {
         viewModelScope.launch {
-            val token = sessionRepository.getToken() ?: run {
+            val token = sessionRepository.getToken()
+            Log.d("PatientVM", "token: $token")  // ← ¿es null?
+            Log.d("PatientVM", "branchId: $branchId")  // ← ¿llega bien?
+
+            if (token == null) {
                 _uiState.update { it.copy(mensajeError = "Sesión no válida") }
                 return@launch
             }
+
             _uiState.update { it.copy(isLoading = true, mensajeError = "") }
             val list = getPatientsByBranchUseCase(token, branchId)
+            Log.d("PatientVM", "pacientes recibidos: ${list.size}")  // ← ¿llegan?
             _uiState.update { it.copy(isLoading = false, listaPacientes = list) }
         }
     }

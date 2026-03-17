@@ -38,8 +38,8 @@ fun PatientFormScreen(
     viewModel: PatientViewModel = hiltViewModel(),
     cameraVm: CameraViewModel = hiltViewModel()
 ) {
-    val state by viewModel.uiState.collectAsStateWithLifecycle()
     val capturedImageFile by viewModel.capturedImageFile.collectAsStateWithLifecycle()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
 
     val cameraManager = rememberCameraManager(

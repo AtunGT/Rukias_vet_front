@@ -2,6 +2,7 @@ package com.arthur.rukiasvet.features.login.navigation
 
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraphBuilder
@@ -12,6 +13,7 @@ import com.arthur.rukiasvet.core.navigation.FeatureNavGraph
 import com.arthur.rukiasvet.core.navigation.Login
 import com.arthur.rukiasvet.features.login.presentation.screens.LoginOrRegisterContent
 import com.arthur.rukiasvet.features.login.presentation.viewmodels.VeterinaryViewModel
+import kotlinx.coroutines.flow.filter
 import javax.inject.Inject
 
 class AuthNavGraph @Inject constructor() : FeatureNavGraph {

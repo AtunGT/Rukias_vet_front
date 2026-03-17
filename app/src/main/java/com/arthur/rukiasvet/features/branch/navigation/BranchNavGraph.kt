@@ -2,6 +2,8 @@ package com.arthur.rukiasvet.features.branch.navigation
 
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraphBuilder
@@ -18,6 +20,7 @@ import com.arthur.rukiasvet.features.branch.presentation.screens.BranchListScree
 import com.arthur.rukiasvet.features.patient.presentation.screens.PatientFormScreen
 import com.arthur.rukiasvet.features.branch.presentation.viewmodels.BranchViewModel
 import com.arthur.rukiasvet.features.patient.presentation.viewmodels.PatientViewModel
+import kotlinx.coroutines.delay
 import javax.inject.Inject
 
 class BranchNavGraph @Inject constructor(
@@ -91,18 +94,28 @@ class BranchNavGraph @Inject constructor(
 
         navGraphBuilder.composable<PatientForm> { backStackEntry ->
             val args = backStackEntry.toRoute<PatientForm>()
-            val userId by sessionManager.userId.collectAsStateWithLifecycle()
 
-            if (userId != null) {
+            val stableUserId = remember {
+                mutableStateOf(sessionManager.userId.value)
+            }
+
+            val userId by sessionManager.userId.collectAsStateWithLifecycle()
+            LaunchedEffect(userId) {
+                if (userId != null) stableUserId.value = userId
+            }
+
+            stableUserId.value?.let { id ->
                 PatientFormScreen(
                     branchId = args.branchId,
                     patientId = args.patientId,
-                    userId = userId!!,
+                    userId = id,
                     onSaveSuccess = { navController.popBackStack() },
                     onCancel = { navController.popBackStack() }
                 )
-            } else {
-                LaunchedEffect(Unit) { navController.popBackStack() }
+            } ?: run {
+                LaunchedEffect(Unit) {
+                    navController.popBackStack()
+                }
             }
         }
     }

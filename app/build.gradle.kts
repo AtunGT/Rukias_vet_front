@@ -74,6 +74,7 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.play.services.cast.framework)
     implementation(libs.androidx.compose.foundation)
+    implementation(libs.androidx.compose.runtime.saveable)
     kapt(libs.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
 

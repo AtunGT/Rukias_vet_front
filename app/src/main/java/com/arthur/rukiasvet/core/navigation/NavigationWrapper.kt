@@ -14,7 +14,6 @@ fun NavigationWrapper(
     featureNavGraphs: List<FeatureNavGraph>
 ) {
     val navController = rememberNavController()
-    val isAuthenticated by sessionManager.isAuthenticated.collectAsStateWithLifecycle()
 
     NavHost(
         navController = navController,
@@ -22,14 +21,6 @@ fun NavigationWrapper(
     ) {
         featureNavGraphs.forEach { graph ->
             graph.registerGraph(this, navController)
-        }
-    }
-
-    LaunchedEffect(isAuthenticated) {
-        if (!isAuthenticated) {
-            navController.navigate(Login) {
-                popUpTo(0) { inclusive = true }
-            }
         }
     }
 }

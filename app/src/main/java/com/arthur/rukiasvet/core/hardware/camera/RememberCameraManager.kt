@@ -5,6 +5,7 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.LocalContext
 import com.arthur.rukiasvet.core.hardware.storage.FileRepository
 import com.arthur.rukiasvet.core.permissions.rememberPermissionManager
@@ -24,14 +25,23 @@ fun rememberCameraManager(
     onImageReady: (File) -> Unit
 ): CameraManager {
     val context = LocalContext.current
-    var capturedFile by remember { mutableStateOf<File?>(null) }
-    var tempFile by remember { mutableStateOf<File?>(null) }
+
+    var tempFilePath by rememberSaveable { mutableStateOf<String?>(null) }
 
     val cameraLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.TakePicture()
     ) { success ->
-        if (success) tempFile?.let { capturedFile = it; onImageReady(it) }
-        else tempFile?.delete()
+        if (success) {
+            tempFilePath?.let { path ->
+                val file = File(path)
+                if (file.exists()) {
+                    onImageReady(file)
+                }
+            }
+        } else {
+            tempFilePath?.let { File(it).delete() }
+            tempFilePath = null
+        }
     }
 
     val galleryLauncher = rememberLauncherForActivityResult(
@@ -39,7 +49,6 @@ fun rememberCameraManager(
     ) { uri ->
         uri?.let {
             val file = fileRepository.copyUriToFile(context, it)
-            capturedFile = file
             onImageReady(file)
         }
     }
@@ -48,7 +57,7 @@ fun rememberCameraManager(
         onCameraGranted = {
             val file = cameraRepository.createTempImageFile(context)
             val uri = cameraRepository.getUriForFile(context, file)
-            tempFile = file
+            tempFilePath = file.absolutePath  
             cameraLauncher.launch(uri)
         },
         onGalleryGranted = { galleryLauncher.launch("image/*") },
@@ -56,9 +65,12 @@ fun rememberCameraManager(
     )
 
     return CameraManager(
-        capturedFile = capturedFile,
+        capturedFile = tempFilePath?.let { File(it) },
         onTakePicture = { permissionManager.onRequestCamera() },
         onPickFromGallery = { permissionManager.onRequestGallery() },
-        onClear = { capturedFile?.delete(); capturedFile = null }
+        onClear = {
+            tempFilePath?.let { File(it).delete() }
+            tempFilePath = null
+        }
     )
 }

@@ -1,5 +1,7 @@
 package com.arthur.rukiasvet.core.session
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -10,6 +12,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 interface SessionRepository {
     suspend fun getToken(): String?
@@ -43,15 +46,14 @@ class SessionManagerImpl @Inject constructor(
     private val _isAuthenticated = MutableStateFlow(false)
     override val isAuthenticated = _isAuthenticated.asStateFlow()
 
-    // ← Carga el token guardado al iniciar
     init {
-        kotlinx.coroutines.GlobalScope.launch {
+        CoroutineScope(Dispatchers.IO).launch {
             val savedToken = sessionRepository.getToken()
             val savedUserId = sessionRepository.getCurrentUserId()
             if (savedToken != null) {
-                _token.update { savedToken }
-                _userId.update { savedUserId }
-                _isAuthenticated.update { true }
+                _token.value = savedToken
+                _userId.value = savedUserId
+                _isAuthenticated.value = true
             }
         }
     }
@@ -59,15 +61,15 @@ class SessionManagerImpl @Inject constructor(
     override suspend fun login(token: String, userId: Int) {
         sessionRepository.saveToken(token)
         sessionRepository.saveUserId(userId)
-        _token.update { token }
-        _userId.update { userId }
-        _isAuthenticated.update { true }
+        _token.value = token
+        _userId.value = userId
+        _isAuthenticated.value = true
     }
 
     override suspend fun logout() {
         sessionRepository.clearToken()
-        _token.update { null }
-        _userId.update { null }
-        _isAuthenticated.update { false }
+        _token.value = null
+        _userId.value = null
+        _isAuthenticated.value = false
     }
 }
